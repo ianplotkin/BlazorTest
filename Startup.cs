@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
@@ -43,7 +45,12 @@ namespace BlazorTest
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddSingleton<WeatherForecastService>();
-            services.AddDataProtection().SetApplicationName("grocery").PersistKeysToFileSystem(new DirectoryInfo(@"keys"));
+            services.AddDataProtection().SetApplicationName("grocery").PersistKeysToFileSystem(new DirectoryInfo(@"keys"))
+                .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration()
+                {
+                    EncryptionAlgorithm = EncryptionAlgorithm.AES_256_CBC,
+                    ValidationAlgorithm = ValidationAlgorithm.HMACSHA256
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
