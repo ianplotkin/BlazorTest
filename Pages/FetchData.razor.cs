@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace BlazorTest.Pages
 {
@@ -23,6 +24,30 @@ namespace BlazorTest.Pages
             forecasts = await @Service.GetForecastAsync(user.Identity.Name);
         }
         WeatherForecast objWeatherForecast = new WeatherForecast();
+
+        private Timer timer;
+
+        protected override void OnAfterRender(bool firstRender)
+        {
+            if (firstRender)
+            {
+                timer = new Timer();
+                timer.Interval = 1000;
+                timer.Elapsed += OnTimerInterval;
+                timer.AutoReset = true;
+                // Start the timer
+                timer.Enabled = true;
+            }
+            base.OnAfterRender(firstRender);
+        }
+
+        private void OnTimerInterval(object sender, ElapsedEventArgs e)
+        {
+            InvokeAsync(() => StateHasChanged());
+        }
+
+
+
         bool ShowPopup = false;
         void ClosePopup()
         {
