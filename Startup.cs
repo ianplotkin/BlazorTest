@@ -37,6 +37,8 @@ namespace BlazorTest
         {
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             Console.WriteLine($"*** CONNECTION: {connectionString}");
+            services.AddDbContext<BlazorTestDB.Data.BlazorTest.GroceryContext>(options =>
+              options.UseSqlServer(connectionString));
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -45,7 +47,7 @@ namespace BlazorTest
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddDatabaseDeveloperPageExceptionFilter();
-            services.AddSingleton<WeatherForecastService>();
+            services.AddScoped<WeatherForecastService>();
             services.AddDataProtection().SetApplicationName("grocery").PersistKeysToFileSystem(new DirectoryInfo(@"keys"))
                 .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration()
                 {
