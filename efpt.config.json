@@ -7,12 +7,20 @@
    "IncludeConnectionString": false,
    "ModelNamespace": null,
    "OutputContextPath": null,
-   "OutputPath": "Data\\BlazorTest",
-   "ProjectRootNamespace": "BlazorTest",
+   "OutputPath": "Data\\Models",
+   "ProjectRootNamespace": "BlazorTest.Data",
    "Schemas": null,
    "SelectedHandlebarsLanguage": 0,
    "SelectedToBeGenerated": 0,
    "Tables": [
+      {
+         "Name": "[dbo].[Category]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Grocery]",
+         "ObjectType": 0
+      },
       {
          "Name": "[dbo].[WeatherForecast]",
          "ObjectType": 0

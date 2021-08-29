@@ -4,27 +4,23 @@ using BlazorTest.Data.Data.Models;
 using BlazorTest.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Hosting;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace BlazorTest.Pages
 {
-    public partial class FetchData
+    public partial class Categories
     {
         private string _hubUrl;
         private HubConnection _hubConnection;
-        WeatherForecastService svc;
+        CategoryService svc;
 
         // AuthenticationState is available as a CascadingParameter
         [CascadingParameter]
         private Task<AuthenticationState> authenticationStateTask { get; set; }
-        List<WeatherForecast> forecasts;
+        List<Category> categories;
         protected override async Task OnInitializedAsync()
         {
             // Get the current user
@@ -35,8 +31,8 @@ namespace BlazorTest.Pages
             await Refresh();
 
             var baseUrl = Env.IsDevelopment() ? navigationManager.BaseUri : "http://localhost";
-            _hubUrl = baseUrl.TrimEnd('/') + UpdateHub.HubUrl;
-            
+            _hubUrl = baseUrl.TrimEnd('/') + CategoryHub.HubUrl;
+
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(_hubUrl)
                 .Build();
@@ -44,23 +40,18 @@ namespace BlazorTest.Pages
             _hubConnection.On("SomethingChanged", Refresh);
 
             await _hubConnection.StartAsync();
-
-            //await SendAsync($"[Notice] {_username} joined chat room.");
         }
 
         public async Task Refresh()
         {
-            Debug.WriteLine("refreshing...");
-            await this.jsConsole.LogAsync("refreshing");
-
-            var user = (await authenticationStateTask).User;
-
-            forecasts = await svc.GetForecastAsync(user.Identity.Name);
+            //Debug.WriteLine("refreshing...");
+            //await this.jsConsole.LogAsync("refreshing");
+            //var user = (await authenticationStateTask).User;
+            categories = await svc.GetCategoriesAsync();
             await InvokeAsync(() => StateHasChanged());
-
         }
 
-        WeatherForecast objWeatherForecast = new WeatherForecast();
+        Category objCategory = new Category();
 
         bool ShowPopup = false;
         void ClosePopup()
@@ -68,24 +59,27 @@ namespace BlazorTest.Pages
             // Close the Popup
             ShowPopup = false;
         }
-        void AddNewForecast()
+        void AddNewCategory()
         {
-            // Make new forecast
-            objWeatherForecast = new WeatherForecast();
-            // Set Id to 0 so we know it is a new record
-            objWeatherForecast.Id = 0;
-            // Open the Popup
+            objCategory = new Category { Id = 0 };
             ShowPopup = true;
         }
-        async Task SaveForecast()
+
+        async Task SaveCategory()
         {
-            // Close the Popup
             ShowPopup = false;
-            // Get the current user
+
             var user = (await authenticationStateTask).User;
-            // A new forecast will have the Id set to 0
-            if (objWeatherForecast.Id == 0)
+
+            if (objCategory.Id == 0)
             {
+                var objNewCategory = new Category
+                {
+                    Name = objCategory.Name
+                    // add created by etc
+                };
+
+                /*
                 // Create new forecast
                 WeatherForecast objNewWeatherForecast = new WeatherForecast();
                 objNewWeatherForecast.Date = System.DateTime.Now;
@@ -96,38 +90,29 @@ namespace BlazorTest.Pages
                 Convert.ToInt32(objWeatherForecast.TemperatureF);
                 objNewWeatherForecast.UserName = user.Identity.Name;
                 // Save the result
-                var result =
-                @Service.CreateForecastAsync(objNewWeatherForecast);
+                */
+                var result = @Service.CreateCategoryAsync(objNewCategory);
             }
             else
             {
                 // This is an update
-                var result =
-                @Service.UpdateForecastAsync(objWeatherForecast);
+                var result = @Service.UpdateCategoryAsync(objCategory);
             }
             // Get the forecasts for the current user
-            forecasts = await @Service.GetForecastAsync(user.Identity.Name);
+            categories = await @Service.GetCategoriesAsync();
             await _hubConnection.SendAsync("SomethingChanged");
         }
-        void EditForecast(WeatherForecast weatherForecast)
+        void EditCategory(Category category)
         {
-            // Set the selected forecast
-            // as the current forecast
-            objWeatherForecast = weatherForecast;
-            // Open the Popup
+            objCategory = category;
             ShowPopup = true;
         }
-        async Task DeleteForecast()
+        async Task DeleteCategory()
         {
-            // Close the Popup
             ShowPopup = false;
-            // Get the current user
             var user = (await authenticationStateTask).User;
-            // Delete the forecast
-            var result = @Service.DeleteForecastAsync(objWeatherForecast);
-            // Get the forecasts for the current user
-            forecasts =
-            await @Service.GetForecastAsync(user.Identity.Name);
+            var result = @Service.DeleteCategoryAsync(objCategory);
+            categories = await @Service.GetCategoriesAsync();
             await _hubConnection.SendAsync("SomethingChanged");
         }
     }

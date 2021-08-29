@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 #nullable disable
 
-namespace BlazorTest.Data.BlazorTest
+namespace BlazorTest.Data.Data.Models
 {
     public partial class WeatherForecast
     {

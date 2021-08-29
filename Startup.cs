@@ -1,5 +1,6 @@
 using BlazorTest.Areas.Identity;
 using BlazorTest.Data;
+using BlazorTest.Data.Data.Models;
 using BlazorTest.Shared;
 using BlazorTest.Utils;
 using Microsoft.AspNetCore.Builder;
@@ -38,8 +39,7 @@ namespace BlazorTest
         public void ConfigureServices(IServiceCollection services)
         {
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
-            Console.WriteLine($"*** CONNECTION: {connectionString}");
-            services.AddDbContext<BlazorTestDB.Data.BlazorTest.GroceryContext>(options =>
+            services.AddDbContext<GroceryContext>(options =>
               options.UseSqlServer(connectionString));
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
@@ -50,6 +50,8 @@ namespace BlazorTest
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddScoped<WeatherForecastService>();
+            services.AddScoped<GroceryService>();
+            services.AddScoped<CategoryService>();
             services.AddScoped<JsConsole>();
             services.AddDataProtection().SetApplicationName("grocery").PersistKeysToFileSystem(new DirectoryInfo(@"keys"))
                 .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration()
@@ -88,6 +90,7 @@ namespace BlazorTest
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
                 endpoints.MapHub<UpdateHub>(UpdateHub.HubUrl);
+                endpoints.MapHub<CategoryHub>(CategoryHub.HubUrl);
             });
         }
     }

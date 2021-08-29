@@ -1,4 +1,4 @@
-﻿@page "/fetchdata"
+﻿@page "/categories"
 @using BlazorTest.Data
 @using BlazorTest.Utils
 @using Microsoft.AspNetCore.Hosting;
@@ -14,43 +14,37 @@
     connected for a long time.
     We access WeatherForecastService using @Service
 *@
-@inherits OwningComponentBase<WeatherForecastService>
-<h1>Weather forecast</h1>
+@inherits OwningComponentBase<CategoryService>
+<h1>Categories</h1>
 <!-- AuthorizeView allows us to only show sections of the page -->
 <!-- based on the security on the current user -->
 <AuthorizeView>
     <!-- Show this section if the user is logged in -->
     <Authorized>
-        @if (forecasts == null)
+        @if (categories == null)
         {
             <!-- Show this if the current user has no data... yet... -->
             <p><em>Loading...</em></p>
         }
         else
         {
-            <!-- Show the forecasts for the current user -->
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Temp. (C)</th>
-                        <th>Temp. (F)</th>
-                        <th>Summary</th>
+                        <th>Name</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var forecast in forecasts)
+                    @foreach (var category in categories.OrderBy(c => c.Name))
                     {
                         <tr>
-                            <td>@forecast.Date.Value.ToShortDateString()</td>
-                            <td>@forecast.TemperatureC</td>
-                            <td>@forecast.TemperatureF</td>
-                            <td>@forecast.Summary</td>
+                            <td>@category.Name</td>
+
                             <td>
                                 <!-- Edit the current forecast -->
                                 <button class="btn btn-primary"
-                                        @onclick="(() => EditForecast(forecast))">
+                                        @onclick="(() => EditCategory(category))">
                                     Edit
                                 </button>
                             </td>
@@ -59,10 +53,9 @@
                 </tbody>
             </table>
             <p>
-                <!-- Add a new forecast -->
                 <button class="btn btn-primary"
-                        @onclick="AddNewForecast">
-                    Add New Forecast
+                        @onclick="AddNewCategory">
+                    Add New Category
                 </button>
             </p>
         }
@@ -75,41 +68,35 @@
 
 @if (ShowPopup)
 {
-    <!-- This is the popup to create or edit a forecast -->
+    <!-- This is the popup to create or edit a category -->
     <div class="modal" tabindex="-1" style="display:block" role="dialog">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Edit Forecast</h3>
+                    <h3 class="modal-title">Edit Category</h3>
                     <!-- Button to close the popup -->
                     <button type="button" class="close"
                             @onclick="ClosePopup">
                         <span aria-hidden="true">X</span>
                     </button>
                 </div>
-                <!-- Edit form for the current forecast -->
+                <!-- Edit form for the current category -->
                 <div class="modal-body">
                     <input class="form-control" type="text"
-                           placeholder="Celsius forecast"
-                           @bind="objWeatherForecast.TemperatureC" />
-                    <input class="form-control" type="text"
-                           placeholder="Fahrenheit forecast"
-                           @bind="objWeatherForecast.TemperatureF" />
-                    <input class="form-control" type="text"
-                           placeholder="Summary"
-                           @bind="objWeatherForecast.Summary" />
+                           placeholder="Name"
+                           @bind="objCategory.Name" />
                     <br />
-                    <!-- Button to save the forecast -->
+                    <!-- Button to save the category -->
                     <button class="btn btn-primary"
-                            @onclick="SaveForecast">
+                            @onclick="SaveCategory">
                         Save
                     </button>
                     <!-- Only show delete button if not a new record -->
-                    @if (objWeatherForecast.Id > 0)
+                    @if (objCategory.Id > 0)
                     {
-                        <!-- Button to delete the forecast -->
+                        <!-- Button to delete the category -->
                         <button class="btn btn-primary"
-                                @onclick="DeleteForecast">
+                                @onclick="DeleteCategory">
                             Delete
                         </button>
                     }

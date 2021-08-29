@@ -1,5 +1,4 @@
-using BlazorTest.Data.BlazorTest;
-using BlazorTestDB.Data.BlazorTest;
+using BlazorTest.Data.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
