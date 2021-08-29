@@ -33,6 +33,8 @@ namespace BlazorTest.Pages
             await Refresh();
 
             string baseUrl = navigationManager.BaseUri;
+            Debug.WriteLine("BASE URL: " + baseUrl);
+            baseUrl = "http://localhost";
             _hubUrl = baseUrl.TrimEnd('/') + UpdateHub.HubUrl;
 
             _hubConnection = new HubConnectionBuilder()
