@@ -1,9 +1,13 @@
 ﻿
+using BlazorTest.Data;
 using BlazorTest.Data.BlazorTest;
+using BlazorTest.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -11,6 +15,10 @@ namespace BlazorTest.Pages
 {
     public partial class FetchData
     {
+        private string _hubUrl;
+        private HubConnection _hubConnection;
+        WeatherForecastService svc;
+
         // AuthenticationState is available as a CascadingParameter
         [CascadingParameter]
         private Task<AuthenticationState> authenticationStateTask { get; set; }
@@ -18,35 +26,39 @@ namespace BlazorTest.Pages
         protected override async Task OnInitializedAsync()
         {
             // Get the current user
-            var user = (await authenticationStateTask).User;
+            svc = Service;
             // Get the forecasts for the current user
             // We access WeatherForecastService using @Service
-            forecasts = await @Service.GetForecastAsync(user.Identity.Name);
+
+            await Refresh();
+
+            string baseUrl = navigationManager.BaseUri;
+            _hubUrl = baseUrl.TrimEnd('/') + UpdateHub.HubUrl;
+
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(_hubUrl)
+                .Build();
+
+            _hubConnection.On("SomethingChanged", Refresh);
+
+            await _hubConnection.StartAsync();
+
+            //await SendAsync($"[Notice] {_username} joined chat room.");
         }
+
+        public async Task Refresh()
+        {
+            Debug.WriteLine("refreshing...");
+            await this.jsConsole.LogAsync("refreshing");
+
+            var user = (await authenticationStateTask).User;
+
+            forecasts = await svc.GetForecastAsync(user.Identity.Name);
+            await InvokeAsync(() => StateHasChanged());
+
+        }
+
         WeatherForecast objWeatherForecast = new WeatherForecast();
-
-        private Timer timer;
-
-        protected override void OnAfterRender(bool firstRender)
-        {
-            if (firstRender)
-            {
-                timer = new Timer();
-                timer.Interval = 1000;
-                timer.Elapsed += OnTimerInterval;
-                timer.AutoReset = true;
-                // Start the timer
-                timer.Enabled = true;
-            }
-            base.OnAfterRender(firstRender);
-        }
-
-        private void OnTimerInterval(object sender, ElapsedEventArgs e)
-        {
-            InvokeAsync(() => StateHasChanged());
-        }
-
-
 
         bool ShowPopup = false;
         void ClosePopup()
@@ -92,8 +104,8 @@ namespace BlazorTest.Pages
                 @Service.UpdateForecastAsync(objWeatherForecast);
             }
             // Get the forecasts for the current user
-            forecasts =
-            await @Service.GetForecastAsync(user.Identity.Name);
+            forecasts = await @Service.GetForecastAsync(user.Identity.Name);
+            await _hubConnection.SendAsync("SomethingChanged");
         }
         void EditForecast(WeatherForecast weatherForecast)
         {
@@ -114,6 +126,7 @@ namespace BlazorTest.Pages
             // Get the forecasts for the current user
             forecasts =
             await @Service.GetForecastAsync(user.Identity.Name);
+            await _hubConnection.SendAsync("SomethingChanged");
         }
     }
 }

@@ -1,7 +1,10 @@
 ﻿@page "/fetchdata"
 @using BlazorTest.Data
 @using BlazorTest.Data.BlazorTest
+@using BlazorTest.Utils 
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager navigationManager
+@inject JsConsole jsConsole
 @*
     Using OwningComponentBase ensures that the service and related services
     that share its scope are disposed with the component.

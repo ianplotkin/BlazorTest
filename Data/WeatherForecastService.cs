@@ -1,6 +1,7 @@
 using BlazorTest.Data.BlazorTest;
 using BlazorTestDB.Data.BlazorTest;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,12 +11,12 @@ namespace BlazorTest.Data
     public class WeatherForecastService
     {
         private readonly GroceryContext _context;
+
         public WeatherForecastService(GroceryContext context)
         {
             _context = context;
         }
-        public async Task<List<WeatherForecast>>
-            GetForecastAsync(string strCurrentUser)
+        public async Task<List<WeatherForecast>> GetForecastAsync(string strCurrentUser)
         {
             // Get Weather Forecasts  
             return await _context.WeatherForecast

@@ -1,5 +1,7 @@
 using BlazorTest.Areas.Identity;
 using BlazorTest.Data;
+using BlazorTest.Shared;
+using BlazorTest.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -48,6 +50,7 @@ namespace BlazorTest
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddScoped<WeatherForecastService>();
+            services.AddScoped<JsConsole>();
             services.AddDataProtection().SetApplicationName("grocery").PersistKeysToFileSystem(new DirectoryInfo(@"keys"))
                 .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration()
                 {
@@ -84,6 +87,7 @@ namespace BlazorTest
                 endpoints.MapControllers();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
+                endpoints.MapHub<UpdateHub>(UpdateHub.HubUrl);
             });
         }
     }
