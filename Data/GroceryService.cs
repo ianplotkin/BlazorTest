@@ -40,6 +40,8 @@ namespace BlazorTest.Data
             {
                 ExistingGrocery.Name = objGrocery.Name;
                 ExistingGrocery.CategoryId = objGrocery.CategoryId;
+                ExistingGrocery.DefaultAmount = objGrocery.DefaultAmount;
+                ExistingGrocery.DefaultUnit = objGrocery.DefaultUnit;
                 _context.SaveChanges();
             }
             else
@@ -55,7 +57,7 @@ namespace BlazorTest.Data
             if (ExistingGrocery != null)
             {
                 _context.Grocery.Remove(ExistingGrocery);
-                _context.SaveChanges();
+                _context.SaveChanges(); 
             }
             else
             {

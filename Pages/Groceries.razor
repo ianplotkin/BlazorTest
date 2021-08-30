@@ -40,36 +40,36 @@
                             RowUpdate="@OnUpdateRow"
                             RowCreate="@OnCreateRow">
                 <Columns>
-                    <RadzenDataGridColumn TItem="Grocery" Property="Name" Title="Name">
+                    <RadzenDataGridColumn TItem="Grocery" Property="Name" Title="Name" Width="300px">     
                         <EditTemplate Context="grocery">
                             <RadzenTextBox @bind-Value="grocery.Name" Style="width:100%; display: block" Name="Name" />
                             <RadzenRequiredValidator Text="Name is required" Component="Name" Popup="true" />
                         </EditTemplate>
                     </RadzenDataGridColumn>
 
-                    <RadzenDataGridColumn TItem="Grocery" Property="Category.Name" Title="Category">
+                    <RadzenDataGridColumn TItem="Grocery" Property="Category.Name" Title="Category" Width="100px">
                         <EditTemplate Context="grocery">
                             <RadzenDropDown @bind-Value="grocery.CategoryId" Data="@categories" TextProperty="Name" ValueProperty="Id" Style="width:100%" Name="Category"/>
                             <RadzenRequiredValidator Text="Category is required" Component="Category" Popup="true" />
                         </EditTemplate>
                     </RadzenDataGridColumn>
 
-                    <RadzenDataGridColumn TItem="Grocery" Property="DefaultAmount" Title="Amount">
+                    <RadzenDataGridColumn TItem="Grocery" Property="DefaultAmount" Title="Amount" Width="40px">
                         <EditTemplate Context="grocery">
                             <RadzenNumeric @bind-Value="grocery.DefaultAmount" Style="width:100%" />
                         </EditTemplate>
                     </RadzenDataGridColumn>
 
-                    <RadzenDataGridColumn TItem="Grocery" Property="DefaultUnit" Title="Unit">
+                    <RadzenDataGridColumn TItem="Grocery" Property="DefaultUnit" Title="Unit" Width="45px">
                         <EditTemplate Context="grocery">
                             <RadzenDropDown Data="@colorSchemes" @bind-Value="@grocery.DefaultUnit" />
                             @code {
                                 string[] colorSchemes = Enum.GetNames(typeof(BlazorTest.Data.Models.Units));
-                            }
+                            }   
                         </EditTemplate>
                     </RadzenDataGridColumn>
 
-                    <RadzenDataGridColumn TItem="Grocery" Context="grocery" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+                    <RadzenDataGridColumn TItem="Grocery" Context="grocery" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="35px">
                         <Template Context="grocery">
                             <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditRow(grocery))" @onclick:stopPropagation="true">
                             </RadzenButton>
@@ -81,7 +81,7 @@
                             </RadzenButton>
                         </EditTemplate>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn TItem="Grocery" Context="grocery" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
+                    <RadzenDataGridColumn TItem="Grocery" Context="grocery" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
                         <Template Context="grocery">
                             <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(grocery))" @onclick:stopPropagation="true">
                             </RadzenButton>
