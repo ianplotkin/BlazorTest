@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace BlazorTest.Shared
 {
-    public class CategoryHub : Hub
+    public class GroceryHub : Hub
     {
         public const string HubUrl = "/categoryUpdates";
 

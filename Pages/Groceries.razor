@@ -1,0 +1,111 @@
+﻿@page "/groceries"
+@using BlazorTest.Data
+@using BlazorTest.Data.Data.Models
+@using BlazorTest.Utils
+@using Microsoft.AspNetCore.Hosting;
+@using Radzen;
+@using Radzen.Blazor;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager navigationManager
+@inject JsConsole jsConsole
+@inject IWebHostEnvironment Env
+@*
+    Using OwningComponentBase ensures that the service and related services
+    that share its scope are disposed with the component.
+    Otherwise DbContext in ForecastService will live for the life of the
+    connection, which may be problematic if clients stay
+    connected for a long time.
+    We access WeatherForecastService using @Service
+*@
+@inherits OwningComponentBase<GroceryService>
+<h1>Groceries</h1>
+<!-- AuthorizeView allows us to only show sections of the page -->
+<!-- based on the security on the current user -->
+<AuthorizeView>
+    <!-- Show this section if the user is logged in -->
+    <Authorized>
+        @if (groceries == null)
+        {
+            <!-- Show this if the current user has no data... yet... -->
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add" Click="@InsertRow" />
+            <RadzenDataGrid @ref="grid" AllowFiltering="true" FilterMode="FilterMode.Simple"
+                            Data="@groceries" TItem="Grocery"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            Style="height:400px"
+                            EditMode="DataGridEditMode.Single"
+                            RowUpdate="@OnUpdateRow"
+                            RowCreate="@OnCreateRow">
+                <Columns>
+                    <RadzenDataGridColumn TItem="Grocery" Property="Name" Title="Name">
+                        <EditTemplate Context="grocery">
+                            <RadzenTextBox @bind-Value="grocery.Name" Style="width:100%; display: block" Name="Name" />
+                            <RadzenRequiredValidator Text="Name is required" Component="Name" Popup="true" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="Grocery" Property="Category.Name" Title="Category">
+                        <EditTemplate Context="grocery">
+                            <RadzenDropDown @bind-Value="grocery.CategoryId" Data="@categories" TextProperty="Name" ValueProperty="Id" Style="width:100%" Name="Category"/>
+                            <RadzenRequiredValidator Text="Category is required" Component="Category" Popup="true" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="Grocery" Property="DefaultAmount" Title="Amount">
+                        <EditTemplate Context="grocery">
+                            <RadzenNumeric @bind-Value="grocery.DefaultAmount" Style="width:100%" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="Grocery" Property="DefaultUnit" Title="Unit">
+                        <EditTemplate Context="grocery">
+                            <RadzenDropDown Data="@colorSchemes" @bind-Value="@grocery.DefaultUnit" />
+                            @code {
+                                string[] colorSchemes = Enum.GetNames(typeof(BlazorTest.Data.Models.Units));
+                            }
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="Grocery" Context="grocery" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+                        <Template Context="grocery">
+                            <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditRow(grocery))" @onclick:stopPropagation="true">
+                            </RadzenButton>
+                        </Template>
+                        <EditTemplate Context="grocery">
+                            <RadzenButton Icon="save" Size="ButtonSize.Small" Click="@((args) => SaveRow(grocery))">
+                            </RadzenButton>
+                            <RadzenButton Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelEdit(grocery))">
+                            </RadzenButton>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Grocery" Context="grocery" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
+                        <Template Context="grocery">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(grocery))" @onclick:stopPropagation="true">
+                            </RadzenButton>
+                        </Template>
+                        <EditTemplate Context="grocery">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(grocery))">
+                            </RadzenButton>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+                </Columns>
+            </RadzenDataGrid>
+
+            @*<p>
+                    <button class="btn btn-primary"
+                            @onclick="AddNewGrocery">
+                        Add New Grocery
+                    </button>
+                </p>*@
+
+        }
+    </Authorized>
+    <!-- Show this section if the user is not logged in -->
+    <NotAuthorized>
+        <p>You're not signed in.</p>
+    </NotAuthorized>
+</AuthorizeView>

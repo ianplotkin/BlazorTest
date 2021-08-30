@@ -11,6 +11,8 @@ namespace BlazorTest.Data.Data.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public int CategoryId { get; set; }
+        public double? DefaultAmount { get; set; }
+        public string DefaultUnit { get; set; }
 
         public virtual Category Category { get; set; }
     }
