@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Hosting;
+using Radzen.Blazor;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,6 +17,7 @@ namespace BlazorTest.Pages
         private string _hubUrl;
         private HubConnection _hubConnection;
         CategoryService svc;
+        RadzenDataGrid<Category> grid;
 
         // AuthenticationState is available as a CascadingParameter
         [CascadingParameter]
@@ -25,8 +27,6 @@ namespace BlazorTest.Pages
         {
             // Get the current user
             svc = Service;
-            // Get the forecasts for the current user
-            // We access WeatherForecastService using @Service
 
             await Refresh();
 
@@ -44,75 +44,65 @@ namespace BlazorTest.Pages
 
         public async Task Refresh()
         {
-            //Debug.WriteLine("refreshing...");
-            //await this.jsConsole.LogAsync("refreshing");
-            //var user = (await authenticationStateTask).User;
             categories = await svc.GetCategoriesAsync();
             await InvokeAsync(() => StateHasChanged());
         }
 
-        Category objCategory = new Category();
-
-        bool ShowPopup = false;
-        void ClosePopup()
+        void EditRow(Category category)
         {
-            // Close the Popup
-            ShowPopup = false;
-        }
-        void AddNewCategory()
-        {
-            objCategory = new Category { Id = 0 };
-            ShowPopup = true;
+            grid.EditRow(category);
         }
 
-        async Task SaveCategory()
+        async Task OnUpdateRow(Category category)
         {
-            ShowPopup = false;
+            await @Service.UpdateCategoryAsync(category);
+            await grid.Reload();
+            await _hubConnection.SendAsync("SomethingChanged");
+        }
 
-            var user = (await authenticationStateTask).User;
+        async Task SaveRow(Category category)
+        {
+            await grid.UpdateRow(category);
+            await grid.Reload();
+            await _hubConnection.SendAsync("SomethingChanged");
+        }
 
-            if (objCategory.Id == 0)
+        void CancelEdit(Category category)
+        {
+            grid.CancelEditRow(category);
+
+            //// For production
+            //var orderEntry = dbContext.Entry(order);
+            //if (orderEntry.State == EntityState.Modified)
+            //{
+            //    orderEntry.CurrentValues.SetValues(orderEntry.OriginalValues);
+            //    orderEntry.State = EntityState.Unchanged;
+            //}
+        }
+
+        async Task DeleteRow(Category category)
+        {
+            if (categories.Contains(category))
             {
-                var objNewCategory = new Category
-                {
-                    Name = objCategory.Name
-                    // add created by etc
-                };
-
-                /*
-                // Create new forecast
-                WeatherForecast objNewWeatherForecast = new WeatherForecast();
-                objNewWeatherForecast.Date = System.DateTime.Now;
-                objNewWeatherForecast.Summary = objWeatherForecast.Summary;
-                objNewWeatherForecast.TemperatureC =
-                Convert.ToInt32(objWeatherForecast.TemperatureC);
-                objNewWeatherForecast.TemperatureF =
-                Convert.ToInt32(objWeatherForecast.TemperatureF);
-                objNewWeatherForecast.UserName = user.Identity.Name;
-                // Save the result
-                */
-                var result = @Service.CreateCategoryAsync(objNewCategory);
+                await @Service.DeleteCategoryAsync(category);
+                await grid.Reload();
+                await _hubConnection.SendAsync("SomethingChanged");
             }
             else
             {
-                // This is an update
-                var result = @Service.UpdateCategoryAsync(objCategory);
+                grid.CancelEditRow(category);
             }
-            // Get the forecasts for the current user
-            categories = await @Service.GetCategoriesAsync();
-            await _hubConnection.SendAsync("SomethingChanged");
         }
-        void EditCategory(Category category)
+
+        void InsertRow()
         {
-            objCategory = category;
-            ShowPopup = true;
+            grid.InsertRow(new Category());
         }
-        async Task DeleteCategory()
+
+        async Task OnCreateRow(Category category)
         {
-            ShowPopup = false;
-            var user = (await authenticationStateTask).User;
-            var result = @Service.DeleteCategoryAsync(objCategory);
-            categories = await @Service.GetCategoriesAsync();
+            await @Service.CreateCategoryAsync(category);
+            await grid.Reload();
             await _hubConnection.SendAsync("SomethingChanged");
         }
     }

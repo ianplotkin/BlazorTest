@@ -18,7 +18,7 @@ namespace BlazorTest.Data
 
         public async Task<List<Category>> GetCategoriesAsync()
         {
-            return await _context.Category.AsNoTracking().ToListAsync();
+            return await _context.Category.AsNoTracking().OrderBy(c => c.Name).ToListAsync();
         }
 
         public Task<Category> CreateCategoryAsync(Category objCategory)

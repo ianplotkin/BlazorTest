@@ -1,7 +1,10 @@
 ﻿@page "/categories"
 @using BlazorTest.Data
+@using BlazorTest.Data.Data.Models 
 @using BlazorTest.Utils
 @using Microsoft.AspNetCore.Hosting;
+@using Radzen; 
+@using Radzen.Blazor; 
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager navigationManager
 @inject JsConsole jsConsole
@@ -28,36 +31,54 @@
         }
         else
         {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var category in categories.OrderBy(c => c.Name))
-                    {
-                        <tr>
-                            <td>@category.Name</td>
+            <RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add" Click="@InsertRow" />
+            <RadzenDataGrid @ref="grid" AllowFiltering="true" FilterMode="FilterMode.Simple"
+                            Data="@categories" TItem="Category"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            Style="height:400px"
+                            EditMode="DataGridEditMode.Single"
+                            RowUpdate="@OnUpdateRow"
+                            RowCreate="@OnCreateRow">
+                <Columns>
+                    <RadzenDataGridColumn TItem="Category" Property="Name" Title="Name" >
+                        <EditTemplate Context="category">
+                            <RadzenTextBox @bind-Value="category.Name" Style="width:100%; display: block" Name="Name" />
+                            <RadzenRequiredValidator Text="Name is required" Component="Name" Popup="true" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Category" Context="category" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+                        <Template Context="category">
+                            <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditRow(category))" @onclick:stopPropagation="true">
+                            </RadzenButton>
+                        </Template>
+                        <EditTemplate Context="category">
+                            <RadzenButton Icon="save" Size="ButtonSize.Small" Click="@((args) => SaveRow(category))">
+                            </RadzenButton>
+                            <RadzenButton Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelEdit(category))">
+                            </RadzenButton>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Category" Context="category" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
+                        <Template Context="category">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(category))" @onclick:stopPropagation="true">
+                            </RadzenButton>
+                        </Template>
+                        <EditTemplate Context="category">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(category))">
+                            </RadzenButton>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
 
-                            <td>
-                                <!-- Edit the current forecast -->
-                                <button class="btn btn-primary"
-                                        @onclick="(() => EditCategory(category))">
-                                    Edit
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-            <p>
+                </Columns>
+            </RadzenDataGrid>
+
+            @*<p>
                 <button class="btn btn-primary"
                         @onclick="AddNewCategory">
                     Add New Category
                 </button>
-            </p>
+            </p>*@
+
         }
     </Authorized>
     <!-- Show this section if the user is not logged in -->
@@ -65,43 +86,3 @@
         <p>You're not signed in.</p>
     </NotAuthorized>
 </AuthorizeView>
-
-@if (ShowPopup)
-{
-    <!-- This is the popup to create or edit a category -->
-    <div class="modal" tabindex="-1" style="display:block" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title">Edit Category</h3>
-                    <!-- Button to close the popup -->
-                    <button type="button" class="close"
-                            @onclick="ClosePopup">
-                        <span aria-hidden="true">X</span>
-                    </button>
-                </div>
-                <!-- Edit form for the current category -->
-                <div class="modal-body">
-                    <input class="form-control" type="text"
-                           placeholder="Name"
-                           @bind="objCategory.Name" />
-                    <br />
-                    <!-- Button to save the category -->
-                    <button class="btn btn-primary"
-                            @onclick="SaveCategory">
-                        Save
-                    </button>
-                    <!-- Only show delete button if not a new record -->
-                    @if (objCategory.Id > 0)
-                    {
-                        <!-- Button to delete the category -->
-                        <button class="btn btn-primary"
-                                @onclick="DeleteCategory">
-                            Delete
-                        </button>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-}
