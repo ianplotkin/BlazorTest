@@ -31,78 +31,29 @@
         }
         else
         {
-            <RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add" Click="@InsertRow" />
-            <RadzenDataGrid @ref="grid" AllowFiltering="true" FilterMode="FilterMode.Simple"
-                            AllowColumnResize="true"
-                            Data="@groceries" TItem="Grocery"
+            @*<RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add" Click="@InsertRow" />*@
+            <RadzenTextBox Placeholder="Add Item..." @oninput=@(args => AddTextChanged(args.Value.ToString())) />
+
+            <RadzenDataGrid @ref="grid" AllowFiltering="false"
+                            AllowColumnResize="false"
+                            Data="@displayedGroceries" TItem="Grocery"
                             FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
                             Style="height:400px"
-                            EditMode="DataGridEditMode.Single"
-                            RowUpdate="@OnUpdateRow"
-                            RowCreate="@OnCreateRow">
+                            RowSelect="@EditGrocery">
                 <Columns>
-                    <RadzenDataGridColumn TItem="Grocery" Property="Name" Title="Name" Width="200px">     
-                        <EditTemplate Context="grocery">
-                            <RadzenTextBox @bind-Value="grocery.Name" Style="width:100%; display: block" Name="Name" />
-                            <RadzenRequiredValidator Text="Name is required" Component="Name" Popup="true" />
-                        </EditTemplate>
-                    </RadzenDataGridColumn>
-
-                    <RadzenDataGridColumn TItem="Grocery" Property="Category.Name" Title="Category" Width="100px">
-                        <EditTemplate Context="grocery">
-                            <RadzenDropDown @bind-Value="grocery.CategoryId" Data="@categories" TextProperty="Name" ValueProperty="Id" Style="width:100%" Name="Category"/>
-                            <RadzenRequiredValidator Text="Category is required" Component="Category" Popup="true" />
-                        </EditTemplate>
-                    </RadzenDataGridColumn>
-
-                    <RadzenDataGridColumn TItem="Grocery" Property="DefaultAmount" Title="Amount" Width="40px">
-                        <EditTemplate Context="grocery">
-                            <RadzenNumeric @bind-Value="grocery.DefaultAmount" Style="width:100%" />
-                        </EditTemplate>
-                    </RadzenDataGridColumn>
-
-                    <RadzenDataGridColumn TItem="Grocery" Property="DefaultUnit" Title="Unit" Width="45px">
-                        <EditTemplate Context="grocery">
-                            <RadzenDropDown Data="@colorSchemes" @bind-Value="@grocery.DefaultUnit" />
-                            @code {
-                                string[] colorSchemes = Enum.GetNames(typeof(BlazorTest.Data.Models.Units));
-                            }   
-                        </EditTemplate>
-                    </RadzenDataGridColumn>
-
-                    <RadzenDataGridColumn TItem="Grocery" Context="grocery" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="35px">
+                    <RadzenDataGridColumn TItem="Grocery">
                         <Template Context="grocery">
-                            <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditRow(grocery))" @onclick:stopPropagation="true">
-                            </RadzenButton>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @grocery.Name
+                                    <br />
+                                    @grocery.DefaultAmount @grocery.DefaultUnit
+                                </div>
+                            </div>
                         </Template>
-                        <EditTemplate Context="grocery">
-                            <RadzenButton Icon="save" Size="ButtonSize.Small" Click="@((args) => SaveRow(grocery))">
-                            </RadzenButton>
-                            <RadzenButton Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelEdit(grocery))">
-                            </RadzenButton>
-                        </EditTemplate>
                     </RadzenDataGridColumn>
-                    <RadzenDataGridColumn TItem="Grocery" Context="grocery" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="20px">
-                        <Template Context="grocery">
-                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(grocery))" @onclick:stopPropagation="true">
-                            </RadzenButton>
-                        </Template>
-                        <EditTemplate Context="grocery">
-                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(grocery))">
-                            </RadzenButton>
-                        </EditTemplate>
-                    </RadzenDataGridColumn>
-
                 </Columns>
             </RadzenDataGrid>
-
-            @*<p>
-                    <button class="btn btn-primary"
-                            @onclick="AddNewGrocery">
-                        Add New Grocery
-                    </button>
-                </p>*@
-
         }
     </Authorized>
     <!-- Show this section if the user is not logged in -->
@@ -110,3 +61,57 @@
         <p>You're not signed in.</p>
     </NotAuthorized>
 </AuthorizeView>
+
+
+@if (showPopup)
+{
+    <!-- This is the popup to create or edit a forecast -->
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Edit Forecast</h3>
+                    <!-- Button to close the popup -->
+                    <button type="button" class="close"
+                            @onclick="ClosePopup">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+                <!-- Edit form for the current forecast -->
+                <div class="modal-body">
+                    <RadzenLabel @bind-value="@editingGrocery.Name" />
+                    <div class="row">
+                        <div class="col-xs-2 col-sm-2">
+                            <RadzenNumeric @bind-Value="@editingGrocery.DefaultAmount" TValue="double" Placeholder="0.0" Step="1" />
+                        </div>
+                        <div class="col-xs-4 col-sm-4">
+                            <RadzenDropDown Data="@units" @bind-Value="@editingGrocery.DefaultUnit" />
+                            @code {
+                                string[] units = Enum.GetNames(typeof(BlazorTest.Data.Data.Models.Units));
+                            }
+                        </div>
+                        <div class="col-xs-4 col-sm-4">
+                            <RadzenDropDown @bind-Value="editingGrocery.CategoryId" Data="@categories" TextProperty="Name" ValueProperty="Id" Name="Category" />
+                        </div>
+                    </div>
+
+                        <br />
+                        <!-- Button to save the forecast -->
+                        <button class="btn btn-primary"
+                                @onclick="SaveGrocery">
+                            Save
+                        </button>
+                        <!-- Only show delete button if not a new record -->
+                        @if (editingGrocery.Id > 0)
+                        {
+                            <!-- Button to delete the forecast -->
+                            <button class="btn btn-primary"
+                                    @onclick="DeleteGrocery">
+                                Delete
+                            </button>
+                        }
+                    </div>
+            </div>
+        </div>
+    </div>
+}

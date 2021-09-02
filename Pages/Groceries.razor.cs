@@ -8,104 +8,91 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Hosting;
 using Radzen.Blazor;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BlazorTest.Pages
 {
     public partial class Groceries
     {
-        private string _hubUrl;
-        private HubConnection _hubConnection;
-        GroceryService svc;
-        RadzenDataGrid<Grocery> grid;
+        private HubConnection hubConnection;
+        private GroceryService svc;
+        private RadzenDataGrid<Grocery> grid;
+        private Grocery editingGrocery;
+        private List<Grocery> groceries;
+        private List<Grocery> displayedGroceries;
+        private List<Category> categories;
+        private bool showPopup = false;
+        private string addItemText;
 
         // AuthenticationState is available as a CascadingParameter
         [CascadingParameter]
         private Task<AuthenticationState> authenticationStateTask { get; set; }
-        List<Grocery> groceries;
-        List<Category> categories;
+
         protected override async Task OnInitializedAsync()
         {
-            // Get the current user
             svc = Service;
 
             await Refresh();
 
-            var baseUrl = Env.IsDevelopment() ? navigationManager.BaseUri : "http://localhost";
-            _hubUrl = baseUrl.TrimEnd('/') + GroceryHub.HubUrl;
-
-            _hubConnection = new HubConnectionBuilder()
-                .WithUrl(_hubUrl)
-                .Build();
-
-            _hubConnection.On("SomethingChanged", Refresh);
-
-            await _hubConnection.StartAsync();
+            var hubUrl = (Env.IsDevelopment() ? navigationManager.BaseUri.TrimEnd('/') : "http://localhost") + GroceryHub.HubUrl;
+            hubConnection = new HubConnectionBuilder().WithUrl(hubUrl).Build();
+            hubConnection.On("SomethingChanged", Refresh);
+            await hubConnection.StartAsync();
         }
 
         public async Task Refresh()
         {
             groceries = await svc.GetGroceriesAsync();
             categories = await svc.GetCategoriesAsync();
+            UpdateDisplayedGroceries();
             await InvokeAsync(() => StateHasChanged());
         }
 
-        void EditRow(Grocery grocery)
+        public void UpdateDisplayedGroceries()
         {
-            grid.EditRow(grocery);
+            displayedGroceries = string.IsNullOrEmpty(addItemText) ? groceries :
+                groceries.Where(g => g.Name.ToUpper().Contains(addItemText.ToUpper())).ToList();
         }
 
-        async Task OnUpdateRow(Grocery grocery)
+        void ClosePopup()
         {
-            await @Service.UpdateGroceryAsync(grocery);
-            await grid.Reload();
-            await _hubConnection.SendAsync("SomethingChanged");
+            showPopup = false;
         }
 
-        async Task SaveRow(Grocery grocery)
+        void EditGrocery(Grocery grocery)
         {
-            await grid.UpdateRow(grocery);
-            await grid.Reload();
-            await _hubConnection.SendAsync("SomethingChanged");
+            editingGrocery = grocery.Clone();
+            showPopup = true;
         }
 
-        void CancelEdit(Grocery grocery)
+        async Task SaveGrocery()
         {
-            grid.CancelEditRow(grocery);
-
-            //// For production
-            //var orderEntry = dbContext.Entry(order);
-            //if (orderEntry.State == EntityState.Modified)
-            //{
-            //    orderEntry.CurrentValues.SetValues(orderEntry.OriginalValues);
-            //    orderEntry.State = EntityState.Unchanged;
-            //}
-        }
-
-        async Task DeleteRow(Grocery grocery)
-        {
-            if (groceries.Contains(grocery))
+            if (editingGrocery.Id == 0)
             {
-                await @Service.DeleteGroceryAsync(grocery);
-                await grid.Reload();
-                await _hubConnection.SendAsync("SomethingChanged");
+                await @Service.CreateGroceryAsync(editingGrocery);
             }
             else
             {
-                grid.CancelEditRow(grocery);
+                await @Service.UpdateGroceryAsync(editingGrocery);
             }
+
+            showPopup = false;
+            await Refresh();
         }
 
-        void InsertRow()
+        async Task DeleteGrocery()
         {
-            grid.InsertRow(new Grocery());
+            // Close the Popup
+            showPopup = false;
+            await Service.DeleteGroceryAsync(editingGrocery);
+            await Refresh();
         }
 
-        async Task OnCreateRow(Grocery grocery)
+        void AddTextChanged(string value)
         {
-            await @Service.CreateGroceryAsync(grocery);
-            await grid.Reload();
-            await _hubConnection.SendAsync("SomethingChanged");
+            addItemText = value;
+            UpdateDisplayedGroceries();
         }
     }
 }

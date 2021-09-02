@@ -35,7 +35,9 @@ namespace BlazorTest.Data.Data.Models
 
             modelBuilder.Entity<Grocery>(entity =>
             {
-                entity.Property(e => e.DefaultUnit).HasMaxLength(20);
+                entity.Property(e => e.DefaultUnit)
+                    .IsRequired()
+                    .HasMaxLength(20);
 
                 entity.Property(e => e.Name)
                     .IsRequired()

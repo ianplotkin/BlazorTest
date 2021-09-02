@@ -72,7 +72,7 @@ namespace BlazorTest.Pages
         {
             // Make new forecast
             objWeatherForecast = new WeatherForecast();
-            // Set Id to 0 so we know it is a new record
+            // Set Id to 0 so we know it is a new recordef
             objWeatherForecast.Id = 0;
             // Open the Popup
             ShowPopup = true;
