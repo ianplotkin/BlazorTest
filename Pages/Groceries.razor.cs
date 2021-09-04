@@ -33,20 +33,24 @@ namespace BlazorTest.Pages
         {
             svc = Service;
 
-            await Refresh();
+
 
             var hubUrl = (Env.IsDevelopment() ? navigationManager.BaseUri.TrimEnd('/') : "http://localhost") + GroceryHub.HubUrl;
             hubConnection = new HubConnectionBuilder().WithUrl(hubUrl).Build();
             hubConnection.On("SomethingChanged", Refresh);
             await hubConnection.StartAsync();
+
+            await Refresh();
         }
 
         public async Task Refresh()
         {
+            //await jsConsole.LogAsync("REFRESHING...");
             groceries = await svc.GetGroceriesAsync();
             categories = await svc.GetCategoriesAsync();
             UpdateDisplayedGroceries();
             await InvokeAsync(() => StateHasChanged());
+            await hubConnection.SendAsync("SomethingChanged");
         }
 
         public void UpdateDisplayedGroceries()
@@ -93,6 +97,12 @@ namespace BlazorTest.Pages
         {
             addItemText = value;
             UpdateDisplayedGroceries();
+        }
+
+        void AddNewGrocery()
+        {
+            editingGrocery = new Grocery { Id = 0 };
+            showPopup = true;
         }
     }
 }

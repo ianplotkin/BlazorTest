@@ -19,6 +19,8 @@
 *@
 @inherits OwningComponentBase<GroceryService>
 <h1>Groceries</h1>
+
+
 <!-- AuthorizeView allows us to only show sections of the page -->
 <!-- based on the security on the current user -->
 <AuthorizeView>
@@ -31,9 +33,11 @@
         }
         else
         {
-            @*<RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add" Click="@InsertRow" />*@
-            <RadzenTextBox Placeholder="Add Item..." @oninput=@(args => AddTextChanged(args.Value.ToString())) />
-
+            
+    <div >
+        <RadzenTextBox class="col-xs-11" Placeholder="Add Item..." @oninput=@(args => AddTextChanged(args.Value.ToString())) />
+        <RadzenButton class="col-xs-1" Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add" Click="@AddNewGrocery" />
+    </div>
             <RadzenDataGrid @ref="grid" AllowFiltering="false"
                             AllowColumnResize="false"
                             Data="@displayedGroceries" TItem="Grocery"
@@ -81,27 +85,31 @@
                 <div class="modal-body">
                     <RadzenLabel @bind-value="@editingGrocery.Name" />
                     <div class="row">
-                        <div class="col-xs-2 col-sm-2">
+                        <div class="col-sm">
+                            <RadzenTextBox @bind-Value="@editingGrocery.Name" />
+                        </div>
+                        <div class="col-sm">
                             <RadzenNumeric @bind-Value="@editingGrocery.DefaultAmount" TValue="double" Placeholder="0.0" Step="1" />
                         </div>
-                        <div class="col-xs-4 col-sm-4">
+                        <div class="col-sm-">
                             <RadzenDropDown Data="@units" @bind-Value="@editingGrocery.DefaultUnit" />
                             @code {
                                 string[] units = Enum.GetNames(typeof(BlazorTest.Data.Data.Models.Units));
                             }
                         </div>
-                        <div class="col-xs-4 col-sm-4">
+                        <div class="col-sm">
                             <RadzenDropDown @bind-Value="editingGrocery.CategoryId" Data="@categories" TextProperty="Name" ValueProperty="Id" Name="Category" />
                         </div>
                     </div>
-
+                    <div class="row">
+                        <div class="col-xs-12">`
                         <br />
                         <!-- Button to save the forecast -->
                         <button class="btn btn-primary"
                                 @onclick="SaveGrocery">
                             Save
                         </button>
-                        <!-- Only show delete button if not a new record -->
+                        <!-- Only show delete butivton if not a new record -->
                         @if (editingGrocery.Id > 0)
                         {
                             <!-- Button to delete the forecast -->
@@ -110,8 +118,13 @@
                                 Delete
                             </button>
                         }
+                        </div>
                     </div>
+
+                  
             </div>
         </div>
     </div>
+
+        </div>
 }

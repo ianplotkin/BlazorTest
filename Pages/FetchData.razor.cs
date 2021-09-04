@@ -51,7 +51,7 @@ namespace BlazorTest.Pages
         public async Task Refresh()
         {
             Debug.WriteLine("refreshing...");
-            await this.jsConsole.LogAsync("refreshing");
+            //await this.jsConsole.LogAsync("refreshing");
 
             var user = (await authenticationStateTask).User;
 
