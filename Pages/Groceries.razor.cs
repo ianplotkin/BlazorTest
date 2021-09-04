@@ -50,7 +50,7 @@ namespace BlazorTest.Pages
             categories = await svc.GetCategoriesAsync();
             UpdateDisplayedGroceries();
             await InvokeAsync(() => StateHasChanged());
-            await hubConnection.SendAsync("SomethingChanged");
+            //await hubConnection.SendAsync("SomethingChanged");
         }
 
         public void UpdateDisplayedGroceries()
@@ -83,6 +83,7 @@ namespace BlazorTest.Pages
 
             showPopup = false;
             await Refresh();
+            await hubConnection.SendAsync("SomethingChanged");
         }
 
         async Task DeleteGrocery()
@@ -91,6 +92,7 @@ namespace BlazorTest.Pages
             showPopup = false;
             await Service.DeleteGroceryAsync(editingGrocery);
             await Refresh();
+            await hubConnection.SendAsync("SomethingChanged");
         }
 
         void AddTextChanged(string value)
