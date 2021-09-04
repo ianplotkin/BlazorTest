@@ -18,12 +18,12 @@ namespace BlazorTest.Data
 
         public async Task<List<Grocery>> GetGroceriesAsync()
         {
-            return await _context.Grocery.Include(g => g.Category).AsNoTracking().ToListAsync();
+            return await _context.Grocery.Include(g => g.Category).OrderBy(g => g.Name).AsNoTracking().ToListAsync();
         }
 
         public async Task<List<Category>> GetCategoriesAsync()
         {
-            return await _context.Category.AsNoTracking().ToListAsync();
+            return await _context.Category.OrderBy(g => g.Name).AsNoTracking().ToListAsync();
         }
 
         public Task<Grocery> CreateGroceryAsync(Grocery objGrocery)
