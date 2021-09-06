@@ -106,5 +106,26 @@ namespace BlazorTest.Pages
             editingGrocery = new Grocery { Id = 0 };
             showPopup = true;
         }
+
+        async Task Submit(Grocery grocery)
+        {
+            if (grocery.Id == 0)
+            {
+                await @Service.CreateGroceryAsync(grocery);
+            }
+            else
+            {
+                await @Service.UpdateGroceryAsync(grocery);
+            }
+
+            showPopup = false;
+            await Refresh();
+            await hubConnection.SendAsync("SomethingChanged");
+        }
+
+        void Cancel()
+        {
+            showPopup = false;
+        }
     }
 }
