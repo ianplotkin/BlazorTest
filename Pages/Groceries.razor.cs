@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Hosting;
 using Radzen.Blazor;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,17 +18,18 @@ namespace BlazorTest.Pages
     {
         private HubConnection hubConnection;
         private GroceryService svc;
-        private RadzenDataGrid<Grocery> grid;
+        //private RadzenDataGrid<Grocery> grid;
         private Grocery editingGrocery;
         private List<Grocery> groceries;
+        private readonly List<Grocery> selectedGroceries = new();
         private List<Grocery> displayedGroceries;
         private List<Category> categories;
         private bool showPopup = false;
         private string addItemText;
 
         // AuthenticationState is available as a CascadingParameter
-        [CascadingParameter]
-        private Task<AuthenticationState> authenticationStateTask { get; set; }
+        //[CascadingParameter]
+        //private Task<AuthenticationState> authenticationStateTask { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
@@ -126,6 +128,38 @@ namespace BlazorTest.Pages
         void Cancel()
         {
             showPopup = false;
+        }
+
+        async Task IncrementAmount()
+        {
+            editingGrocery.DefaultAmount += 1;
+            await InvokeAsync(() => StateHasChanged());
+            await hubConnection.SendAsync("SomethingChanged");
+            System.Diagnostics.Debug.WriteLine("++++");
+        }
+
+        async Task DecrementAmount()
+        {
+            editingGrocery.DefaultAmount -= 1;
+            await InvokeAsync(() => StateHasChanged());
+            await hubConnection .SendAsync("SomethingChanged");
+            System.Diagnostics.Debug.WriteLine("----");
+        }
+
+        void OnChange(bool isChecked, Grocery grocery)
+        {
+            if (isChecked)
+            {
+                selectedGroceries.Add(grocery);
+                Debug.WriteLine($"Added grocery {grocery.Name}");
+            }
+            else
+            {
+                selectedGroceries.Remove(grocery);
+                Debug.WriteLine($"Removed grocery {grocery.Name}");
+            }
+
+            Debug.WriteLine("Selected groceries: " + string.Join(", ", selectedGroceries.Select(g => g.Name)));
         }
     }
 }

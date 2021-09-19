@@ -8,6 +8,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager navigationManager
 @inject JsConsole jsConsole
+@inject DialogService DialogService
 @inject IWebHostEnvironment Env
 @*
     Using OwningComponentBase ensures that the service and related services
@@ -18,191 +19,169 @@
     We access WeatherForecastService using @Service
 *@
 @inherits OwningComponentBase<GroceryService>
-<h1>Groceries</h1>
+    <RadzenDialog />
+
+    <h1>Groceries</h1>
 
 
-<!-- AuthorizeView allows us to only show sections of the page -->
-<!-- based on the security on the current user -->
-<AuthorizeView>
-    <!-- Show this section if the user is logged in -->
-    <Authorized>
-        @if (groceries == null)
-        {
-            <!-- Show this if the current user has no data... yet... -->
-            <p><em>Loading...</em></p>
-        }
-        else
-        {
-
-            <div>
-                <RadzenTextBox class="col-xs-11" Placeholder="Add Item..." @oninput=@(args => AddTextChanged(args.Value.ToString())) />
-                <RadzenButton class="col-xs-1" Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add" Click="@AddNewGrocery" />
-            </div>
-            <RadzenDataGrid class="col-xs-1" @ref="grid" AllowFiltering="false"
-                            AllowColumnResize="false"
-                            Data="@displayedGroceries" TItem="Grocery"
-                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                            Style="height:400px"
-                            RowSelect="@EditGrocery">
-                <Columns>
-                    <RadzenDataGridColumn TItem="Grocery">
-                        <Template Context="grocery">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    @grocery.Name
-                                    <br />
-                                    @grocery.DefaultAmount @grocery.DefaultUnit
-                                </div>
-                            </div>
-                        </Template>
-                    </RadzenDataGridColumn>
-                </Columns>
-            </RadzenDataGrid>
-        }
-    </Authorized>
-    <!-- Show this section if the user is not logged in -->
-    <NotAuthorized>
-        <p>You're not signed in.</p>
-    </NotAuthorized>
-</AuthorizeView>
-
-
-@if (showPopup)
-{
-    <div class="modal" tabindex="-1" style="display:block" role="dialog">
-        <div class="modal" tabindex="-1" style="display:block" role="dialog">
-            <div class="modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 class="modal-title">Edit Grocery</h3>
-                        <button type="button" class="close"
-                                @onclick="ClosePopup">
-                            <span aria-hidden="true">X</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <RadzenTemplateForm Data="@editingGrocery" Submit="@((Grocery args) => { Submit(args); })">
-                            <div class="row">
-                                <div class="col-xs-12">
-                                    <RadzenFieldset Text="Grocery Info">
-                                        <div class="row">
-                                            <div class="align-items-center d-flex col-xs-1">
-                                                <RadzenLabel Text="Name:" />
-                                            </div>
-                                            <div class="align-items-center d-flex col-xs-4">
-                                                <RadzenTextBox class="form-control" @bind-Value="@editingGrocery.Name" Style="width: 180px" />
-                                            </div>
-                                            <div class="align-items-center d-flex col-xs-1">
-                                                <RadzenLabel Text="Amount:" />
-                                            </div>
-                                            <div class="align-items-center d-flex col-xs-2">
-                                                <RadzenNumeric class="form-control" @bind-Value="@editingGrocery.DefaultAmount" Style="width: 60px" TValue="double" Placeholder="0.0" Step="1" />
-                                            </div>
-                                            <div class="align-items-center d-flex col-xs-2">
-                                                <RadzenDropDown class="form-control" Data="@units" @bind-Value="@editingGrocery.DefaultUnit" Style="width: 100px"  Placeholder="Unit" />
-                                                @code {
-                                                    string[] units = Enum.GetNames(typeof(BlazorTest.Data.Data.Models.Units));
-                                                }
-                                            </div>
-                                            <div class="align-items-center d-flex col-xs-2">
-                                                <RadzenDropDown class="form-control" @bind-Value="editingGrocery.CategoryId" Data="@categories" Style="width: 180px"  Placeholder="Category" TextProperty="Name" ValueProperty="Id" Name="Category" />
-                                            </div>
-                                        </div>
-                                    </RadzenFieldset>
-                                </div>
-                            </div>
-                            <div class="row justify-content-center">
-                                <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
-                                    <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Save" />
-                                    <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" style="display: inline-block; margin-left: 10px;" Text="Cancel" Click="@Cancel" />
-                                </div>
-                            </div>
-                        </RadzenTemplateForm>
-                    </div>
+    <!-- AuthorizeView allows us to only show sections of the page -->
+    <!-- based on the security on the current user -->
+    <AuthorizeView>
+        <!-- Show this section if the user is logged in -->
+        <Authorized>
+            @if (groceries == null)
+            {
+                <!-- Show this if the current user has no data... yet... -->
+                <p><em>Loading...</em></p>
+            }
+            else
+            {
+                <div>
+                    <RadzenTextBox class="col-xs-11" Placeholder="Add Item..." @oninput=@(args => AddTextChanged(args.Value.ToString())) />
+                    <RadzenButton class="col-xs-1" Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add" Click="@AddNewGrocery" />
                 </div>
-            </div>
-        </div>
-    </div>
-        @*
-            <!-- This is the popup to create or edit a forecast -->
+                <RadzenDataGrid class="col-xs-1" AllowFiltering="false"
+                                AllowColumnResize="false"
+                                Data="@displayedGroceries" TItem="Grocery"
+                                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                Style="height:400px">
+                    <Columns>
+                        @*<RadzenDataGridColumn TItem="Grocery" Width="40px" Sortable="false" Filterable="false">
+                            <Template Context="grocery">
+                                <RadzenCheckBox TriState="false" TValue="bool" Value=@(selectedGroceries.Contains(grocery))
+                                                Change="@(args => OnChange(args, grocery))" />
+                            </Template>
+                        </RadzenDataGridColumn>*@
+                        <RadzenDataGridColumn TItem="Grocery">
+                            <Template Context="grocery">
+                                <div class="row">
+                                    <div class="col-md-1">
+                                        <RadzenCheckBox class="oi-vertical-align-center" TriState="false" TValue="bool" Value=@(selectedGroceries.Contains(grocery))
+                                                        Change="@(args => OnChange(args, grocery))" />
+                                    </div>                                  
+                                    <div class="col-md-11">
+                                        <div class="row">
+                                            <RadzenLabel Component="Blah" Text="@grocery.Name" Style="margin-left: 5px;" @onclick="@(args => EditRow(grocery))" />
+                                        </div>
+                                        <div class="row">
+                                            <RadzenLabel Component="Blah" Text=@(grocery.DefaultAmount + "  " + grocery.DefaultUnit) Style="margin-left: 5px;" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            }
+        </Authorized>
+        <!-- Show this section if the user is not logged in -->
+        <NotAuthorized>
+            <p>You're not signed in.</p>
+        </NotAuthorized>
+    </AuthorizeView>
+
+
+    @if (showPopup)
+    {
+        <div class="modal" tabindex="-1" style="display:block" role="dialog">
             <div class="modal" tabindex="-1" style="display:block" role="dialog">
-                <div class="modal-dialog">
+                <div class="modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h3 class="modal-title">Edit Forecast</h3>
-                            <!-- Button to close the popup -->
+                            <h3 class="modal-title">Edit Grocery</h3>
                             <button type="button" class="close"
                                     @onclick="ClosePopup">
                                 <span aria-hidden="true">X</span>
                             </button>
                         </div>
                         <div class="modal-body">
+                            <RadzenTemplateForm Data="@editingGrocery" Submit="@((Grocery args) => { Submit(args); })">
+                                <div class="row">
+                                    <div class="col-xs-12 align-items-center d-flex">
+                                        <RadzenTextBox class="form-control" @bind-Value="@editingGrocery.Name" Style="width: 180px" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12  align-items-center d-fle">
+                                        <RadzenFieldset Text="Grocery Info">
+                                            <div class="row">
+                                                <div class="align-items-center d-flex">
+                                                    @*<RadzenButton Click=@(args => OnClickMinus()) Icon="remove" Style="margin-bottom: 20px; width: 20px" />
+                                                    <RadzenButton Click=@(args => OnClickMinus()) Icon="add" Style="margin-bottom: 20px; width: 20px" />*@
+                                                    <RadzenNumeric ShowUpDown="false" class="form-control" @bind-Value="@editingGrocery.DefaultAmount" Style="width: 60px" TValue="double" Placeholder="0.0" Step="1" />
 
-                            <RadzenLabel @bind-value="@editingGrocery.Name" />*@
-
-        @*<div class="input-group col-xs-12">
-                    <span class="input-group-addon">
-                        <input type="checkbox" class="btn btn-default" checked="">
-                    </span>
-                    <input type="text" class="form-control" value="test1" />
-
-                    <span class="input-group-addon">
-                        <input type="checkbox" class="btn btn-default" checked="">
-                    </span>
-                    <input type="text" class="form-control" value="test2" />
-                    <span class="input-group-btn"></span>
-                    <input type="text" class="form-control" value="test3" />
-                    <span class="input-group-btn"></span>
-                    <input type="text" class="form-control" value="test4" />
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button"><i class="fa fa-globe"></i></button>
-                    </span>
-                    <input type="text" class="form-control" value="test5" />
-                </div>
-
-            <!--<div class="input-group col-xs-12">
-                <RadzenTextBox class="form-control" @bind-Value="@editingGrocery.Name" />
-                <span class="input-group-addon">Amount:</span>
-
-                <RadzenNumeric class="form-control" @bind-Value="@editingGrocery.DefaultAmount" TValue="double" Placeholder="0.0" Step="1" />
-                <RadzenDropDown class="form-control" Data="@units" @bind-Value="@editingGrocery.DefaultUnit" />
-                @code {
-                    string[] units = Enum.GetNames(typeof(BlazorTest.Data.Data.Models.Units));
-                }
-
-                <RadzenDropDown class="form-control" @bind-Value="editingGrocery.CategoryId" Data="@categories" TextProperty="Name" ValueProperty="Id" Name="Category" />
-
-
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    `
-                    <br />-->
-            <!-- Button to save the forecast -->
-            <!--<button class="btn btn-primary"
-                    @onclick="SaveGrocery">
-                Save
-            </button>-->
-            <!-- Only show delete butivton if not a new record -->
-            <!--@if (editingGrocery.Id > 0)
-            {-->
-            <!-- Button to delete the forecast -->
-            <!--<button class="btn btn-primary"
-                                    @onclick="DeleteGrocery">
-                                Delete
-                            </button>
-                        }
+                                                </div>
+                                                <div class="align-items-center d-flex">
+                                                    <RadzenDropDown class="form-control" Data="@units" @bind-Value="@editingGrocery.DefaultUnit" Style="width: 100px" Placeholder="Unit" />
+                                                    @*@code {
+                                                        string[] units = Enum.GetNames(typeof(BlazorTest.Data.Data.Models.Units));
+                                                    }*@
+                                                </div>
+                                                <div class="align-items-center d-flex">
+                                                    <RadzenDropDown class="form-control" @bind-Value="editingGrocery.CategoryId" Data="@categories" Style="width: 180px" Placeholder="Category" TextProperty="Name" ValueProperty="Id" Name="Category" />
+                                                </div>
+                                            </div>
+                                        </RadzenFieldset>
+                                    </div>
+                                </div>
+                                @*<div class="row justify-content-center">
+                                        <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
+                                            <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Save" />
+                                            <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" style="display: inline-block; margin-left: 10px;" Text="Cancel" Click="@Cancel" />
+                                        </div>
+                                    </div>*@
+                            </RadzenTemplateForm>
+                        </div>
                     </div>
                 </div>
-
-
-            </div>-->
             </div>
-            </div>
-            </div>
+        </div>
+        
 
-            </div>
 
-        *@
+    }
 
+    @code{
+
+        async Task EditRow(Grocery grocery)
+        {
+            editingGrocery = grocery;
+            var result = await DialogService.OpenAsync("Edit Grocery", ds =>
+        @<div class="align-items-center">
+    <div class="col-xs-12 align-items-center d-flex">
+        <RadzenTextBox class="form-control" @bind-Value="@editingGrocery.Name" Style="width: 180px" />
+    </div>
+
+    <div class="row">
+        <div class="align-items-center d-flex">
+            <RadzenButton Click="DecrementAmount" Icon="remove" Style="margin-right: 5px; width: 40px" />
+            <RadzenButton Click="IncrementAmount" Icon="add" Style="margin-right: 5px; width: 40px" />
+            <RadzenNumeric ShowUpDown="false" class="form-control" @bind-Value=@editingGrocery.DefaultAmount Style="margin-right: 5px; width: 60px" TValue="double" Placeholder="0.0" />
+        </div>
+        <div class="align-items-center d-flex">
+            <RadzenDropDown class="form-control" Data="@units" @bind-Value=@editingGrocery.DefaultUnit Style="margin-right: 5px; width: 100px" Placeholder="Unit" />
+            @code {
+                string[] units = Enum.GetNames(typeof(BlazorTest.Data.Data.Models.Units));
+            }
+        </div>
+        <div class="align-items-center d-flex">
+            <RadzenDropDown class="form-control" @bind-Value=editingGrocery.CategoryId Data="@categories" Style="width: 180px" Placeholder="Category" TextProperty="Name" ValueProperty="Id" Name="Category" />
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
+            <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Save" Click="() => ds.Close(true)"/>
+            <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" style="display: inline-block; margin-left: 10px;" Text="Cancel" Click="() => ds.Close(false)" />
+        </div>
+    </div>
+
+</div>, new DialogOptions { Width = "400px", Height = "400px", Left = "20px", Top = "20px" });
+
+            System.Diagnostics.Debug.WriteLine($"Dialog result: {result}");
+            if(result)
+            {
+                await Submit(editingGrocery);
+            }
         }
+    }
