@@ -54,17 +54,17 @@
                         </RadzenDataGridColumn>*@
                         <RadzenDataGridColumn TItem="Grocery">
                             <Template Context="grocery">
-                                <div class="row">
-                                    <div class="col-md-1">
-                                        <RadzenCheckBox class="oi-vertical-align-center" TriState="false" TValue="bool" Value=@(selectedGroceries.Contains(grocery))
+                                <div class="row align-items-center">
+                                    <div class="col-1">
+                                        <RadzenCheckBox TriState="false" TValue="bool" Value=@(selectedGroceries.Contains(grocery))
                                                         Change="@(args => OnChange(args, grocery))" />
-                                    </div>                                  
-                                    <div class="col-md-11">
+                                   </div>
+                                    <div class="col-11">
                                         <div class="row">
-                                            <RadzenLabel Component="Blah" Text="@grocery.Name" Style="margin-left: 5px;" @onclick="@(args => EditRow(grocery))" />
+                                            <RadzenLabel Style="margin-left: 15px" Text="@grocery.Name" @onclick="@(args => EditRow(grocery))" />
                                         </div>
                                         <div class="row">
-                                            <RadzenLabel Component="Blah" Text=@(grocery.DefaultAmount + "  " + grocery.DefaultUnit) Style="margin-left: 5px;" />
+                                            <RadzenLabel Style="margin-left: 15px" Text=@(grocery.DefaultAmount + "  " + grocery.DefaultUnit) />
                                         </div>
                                     </div>
                                 </div>
@@ -176,7 +176,7 @@
         </div>
     </div>
 
-</div>, new DialogOptions { Width = "400px", Height = "400px", Left = "20px", Top = "20px" });
+</div>, new DialogOptions {Left = "-20px", Top = "50px" });
 
             System.Diagnostics.Debug.WriteLine($"Dialog result: {result}");
             if(result)
