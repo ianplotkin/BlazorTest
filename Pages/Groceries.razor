@@ -41,24 +41,44 @@
                     <RadzenButton class="col-xs-1" Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add" Click="@AddNewGrocery" />
                 </div>
                 <RadzenDataGrid class="col-xs-1" AllowFiltering="false"
+                                @ref="groceriesGrid"
                                 AllowColumnResize="false"
+                                AllowGrouping="true"
                                 Data="@displayedGroceries" TItem="Grocery"
                                 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-                                Style="height:400px">
+                                Style="height:400px"
+                                Render="@OnRender">
+                    @code {
+
+                        RadzenDataGrid<Grocery> groceriesGrid;
+
+                        void OnRender(DataGridRenderEventArgs<Grocery> args)
+                        {
+                            if (args.FirstRender)
+                            {
+                                args.Grid.Groups.Add(new GroupDescriptor() { Property = "Category.Name" });
+                                StateHasChanged();
+                            }
+                        }
+                    }
+                    <GroupHeaderTemplate Context="data">
+                        @data.Data.Key (@data.Data.Count)
+                    </GroupHeaderTemplate>
+
                     <Columns>
-                        @*<RadzenDataGridColumn TItem="Grocery" Width="40px" Sortable="false" Filterable="false">
-                            <Template Context="grocery">
-                                <RadzenCheckBox TriState="false" TValue="bool" Value=@(selectedGroceries.Contains(grocery))
-                                                Change="@(args => OnChange(args, grocery))" />
-                            </Template>
-                        </RadzenDataGridColumn>*@
+                        <RadzenDataGridColumn TItem="Grocery" Width="40px" Sortable="false" Filterable="false">
+                        <Template Context="grocery">
+                            <RadzenCheckBox TriState="false" TValue="bool" Value=@(selectedGroceries.Contains(grocery))
+                                            Change="@(args => OnChange(args, grocery))" />
+                        </Template>
+                    </RadzenDataGridColumn>
                         <RadzenDataGridColumn TItem="Grocery">
                             <Template Context="grocery">
                                 <div class="row align-items-center">
                                     <div class="col-1">
-                                        <RadzenCheckBox TriState="false" TValue="bool" Value=@(selectedGroceries.Contains(grocery))
+                                        <RadzenCheckBox Style="border-radius: 4px;" TriState="false" TValue="bool" Value=@(selectedGroceries.Contains(grocery))
                                                         Change="@(args => OnChange(args, grocery))" />
-                                   </div>
+                                    </div>
                                     <div class="col-11">
                                         <div class="row">
                                             <RadzenLabel Style="margin-left: 15px" Text="@grocery.Name" @onclick="@(args => EditRow(grocery))" />
@@ -156,7 +176,8 @@
         <div class="align-items-center d-flex">
             <RadzenButton Click="DecrementAmount" Icon="remove" Style="margin-right: 5px; width: 40px" />
             <RadzenButton Click="IncrementAmount" Icon="add" Style="margin-right: 5px; width: 40px" />
-            <RadzenNumeric ShowUpDown="false" class="form-control" @bind-Value=@editingGrocery.DefaultAmount Style="margin-right: 5px; width: 60px" TValue="double" Placeholder="0.0" />
+            <RadzenNumeric ShowUpDown="true" class="form-control" @bind-Value=@editingGrocery.DefaultAmount Style="margin-right: 5px; width: 60px" TValue="double" Placeholder="0.0" />
+            <RadzenLabel Style="margin-left: 15px" Text=@(grocery.DefaultAmount + "  " + grocery.DefaultUnit) />
         </div>
         <div class="align-items-center d-flex">
             <RadzenDropDown class="form-control" Data="@units" @bind-Value=@editingGrocery.DefaultUnit Style="margin-right: 5px; width: 100px" Placeholder="Unit" />
