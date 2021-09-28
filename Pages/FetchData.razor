@@ -2,6 +2,8 @@
 @using BlazorTest.Data
 @using BlazorTest.Utils
 @using Microsoft.AspNetCore.Hosting;
+@using Radzen;
+@using Radzen.Blazor;
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager navigationManager
 @inject JsConsole jsConsole
@@ -89,6 +91,8 @@
                 </div>
                 <!-- Edit form for the current forecast -->
                 <div class="modal-body">
+                    <RadzenButton Click="DecrementAmount" Icon="remove" Style="margin-right: 5px; width: 40px" />
+                    <RadzenButton Click="IncrementAmount" Icon="add" Style="margin-right: 5px; width: 40px" />
                     <input class="form-control" type="text"
                            placeholder="Celsius forecast"
                            @bind="objWeatherForecast.TemperatureC" />

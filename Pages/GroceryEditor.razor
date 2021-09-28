@@ -1,0 +1,64 @@
+﻿@using Radzen;
+@using Radzen.Blazor;
+@using BlazorTest.Data
+@using BlazorTest.Data.Data.Models
+@inject DialogService DialogService
+
+<h3>GroceryEditor</h3>
+
+<div class="align-items-center">
+    <div class="col-xs-12 align-items-center d-flex">
+        <RadzenTextBox class="form-control" @bind-Value="@editingGrocery.Name" Style="width: 180px" />
+    </div>
+
+    <div class="row">
+        <div class="align-items-center d-flex">
+            <RadzenButton Click="DecrementAmount" Icon="remove" Style="margin-right: 5px; width: 40px" />
+            <RadzenButton Click="IncrementAmount" Icon="add" Style="margin-right: 5px; width: 40px" />
+            <RadzenNumeric ShowUpDown="false" class="form-control" @bind-Value=@editingGrocery.DefaultAmount Style="margin-right: 5px; width: 60px" TValue="double" Placeholder="0.0" />
+        </div>
+        <div class="align-items-center d-flex">
+            <RadzenDropDown class="form-control" Data="@units" @bind-Value=@editingGrocery.DefaultUnit Style="margin-right: 5px; width: 100px" Placeholder="Unit" />
+            @code {
+                string[] units = Enum.GetNames(typeof(BlazorTest.Data.Data.Models.Units));
+            }
+        </div>
+        <div class="align-items-center d-flex">
+            <RadzenDropDown class="form-control" @bind-Value=editingGrocery.CategoryId Data="@categories" Style="width: 180px" Placeholder="Category" TextProperty="Name" ValueProperty="Id" Name="Category" />
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-12 d-flex align-items-end justify-content-center" style="margin-top: 16px;">
+            <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Save" Click="() => DialogService.Close(true)" />
+            <RadzenButton ButtonStyle="ButtonStyle.Light" Icon="cancel" style="display: inline-block; margin-left: 10px;" Text="Cancel" Click="() => DialogService.Close(false)" />
+        </div>
+    </div>
+
+</div>
+
+@code {
+    [Parameter]
+    public Grocery editingGrocery { get; set; }
+
+    [Parameter]
+    public List<Category> categories { get; set; }
+
+
+    async Task IncrementAmount()
+    {
+        editingGrocery.DefaultAmount += 1;
+        await InvokeAsync(() => StateHasChanged());
+        //await hubConnection.SendAsync("SomethingChangedOnDialog");
+        System.Diagnostics.Debug.WriteLine("++++");
+    }
+
+    async Task DecrementAmount()
+    {
+        editingGrocery.DefaultAmount -= 1;
+        await InvokeAsync(() => StateHasChanged());
+        //await hubConnection.SendAsync("SomethingChangedOnDialog");
+        System.Diagnostics.Debug.WriteLine("----");
+    }
+
+}

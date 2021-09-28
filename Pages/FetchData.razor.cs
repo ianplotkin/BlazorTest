@@ -130,5 +130,20 @@ namespace BlazorTest.Pages
             await @Service.GetForecastAsync(user.Identity.Name);
             await _hubConnection.SendAsync("SomethingChanged");
         }
+
+
+        async Task IncrementAmount()
+        {
+            objWeatherForecast.TemperatureF += 1;
+            await InvokeAsync(() => StateHasChanged());
+            System.Diagnostics.Debug.WriteLine("++++");
+        }
+
+        async Task DecrementAmount()
+        {
+            objWeatherForecast.TemperatureF -= 1;
+            await InvokeAsync(() => StateHasChanged());
+            System.Diagnostics.Debug.WriteLine("----");
+        }
     }
 }
