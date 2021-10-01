@@ -108,7 +108,7 @@
 
             var result = await DialogService.OpenAsync<GroceryEditor>($"Grocery {editingGrocery}",
             new Dictionary<string, object>() { { "editingGrocery", editingGrocery } , { "categories", categories} },
-            new DialogOptions() { Width = "700px", Height = "530px" });
+            new DialogOptions() { Left = "2px", Top = "20px", Width = "500px", Height = "400px" });
 
 
             System.Diagnostics.Debug.WriteLine($"Dialog result: {result}");
