@@ -20,6 +20,7 @@ namespace BlazorTest.Data.Data.Models
 
         public virtual DbSet<Category> Category { get; set; }
         public virtual DbSet<Grocery> Grocery { get; set; }
+        public virtual DbSet<Store> Store { get; set; }
         public virtual DbSet<WeatherForecast> WeatherForecast { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -48,6 +49,13 @@ namespace BlazorTest.Data.Data.Models
                     .HasForeignKey(d => d.CategoryId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Grocery_Category");
+            });
+
+            modelBuilder.Entity<Store>(entity =>
+            {
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
             });
 
             modelBuilder.Entity<WeatherForecast>(entity =>

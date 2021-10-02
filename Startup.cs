@@ -53,6 +53,7 @@ namespace BlazorTest
             services.AddScoped<WeatherForecastService>();
             services.AddScoped<GroceryService>();
             services.AddScoped<CategoryService>();
+            services.AddScoped<StoreService>();
             services.AddScoped<JsConsole>();
             services.AddDataProtection().SetApplicationName("grocery").PersistKeysToFileSystem(new DirectoryInfo(@"keys"))
                 .UseCryptographicAlgorithms(new AuthenticatedEncryptorConfiguration()
@@ -97,6 +98,7 @@ namespace BlazorTest
                 endpoints.MapFallbackToPage("/_Host");
                 endpoints.MapHub<UpdateHub>(UpdateHub.HubUrl);
                 endpoints.MapHub<CategoryHub>(CategoryHub.HubUrl);
+                endpoints.MapHub<StoreHub>(StoreHub.HubUrl);
             });
         }
     }

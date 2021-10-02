@@ -1,0 +1,80 @@
+﻿@page "/stores"
+@using BlazorTest.Data
+@using BlazorTest.Data.Data.Models
+@using BlazorTest.Utils
+@using Microsoft.AspNetCore.Hosting;
+@using Radzen;
+@using Radzen.Blazor;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager navigationManager
+@inject JsConsole jsConsole
+@inject IWebHostEnvironment Env
+@*
+    Using OwningComponentBase ensures that the service and related services
+    that share its scope are disposed with the component.
+    Otherwise DbContext in ForecastService will live for the life of the
+    connection, which may be problematic if clients stay
+    connected for a long time.
+    We access WeatherForecastService using @Service
+*@
+@inherits OwningComponentBase<StoreService>
+<h1>Storess</h1>
+<!-- AuthorizeView allows us to only show sections of the page -->
+<!-- based on the security on the current user -->
+<AuthorizeView>
+    <!-- Show this section if the user is logged in -->
+    <Authorized>
+        @if (stores == null)
+        {
+            <!-- Show this if the current user has no data... yet... -->
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add" Click="@InsertRow" />
+            <RadzenDataGrid @ref="grid" AllowFiltering="true" FilterMode="FilterMode.Simple"
+                            Data="@stores" TItem="Store"
+                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                            Style="height:400px"
+                            EditMode="DataGridEditMode.Single"
+                            RowUpdate="@OnUpdateRow"
+                            RowCreate="@OnCreateRow">
+                <Columns>
+                    <RadzenDataGridColumn TItem="Store" Property="Name" Title="Name">
+                        <EditTemplate Context="store">
+                            <RadzenTextBox @bind-Value="store.Name" Style="width:100%; display: block" Name="Name" />
+                            <RadzenRequiredValidator Text="Name is required" Component="Name" Popup="true" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Store" Context="category" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+                        <Template Context="store">
+                            <RadzenButton Icon="edit" Size="ButtonSize.Small" Click="@(args => EditRow(store))" @onclick:stopPropagation="true">
+                            </RadzenButton>
+                        </Template>
+                        <EditTemplate Context="store">
+                            <RadzenButton Icon="save" Size="ButtonSize.Small" Click="@((args) => SaveRow(store))">
+                            </RadzenButton>
+                            <RadzenButton Icon="cancel" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelEdit(store))">
+                            </RadzenButton>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Store" Context="store" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
+                        <Template Context="store">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(store))" @onclick:stopPropagation="true">
+                            </RadzenButton>
+                        </Template>
+                        <EditTemplate Context="store">
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="close" Size="ButtonSize.Small" Click="@(args => DeleteRow(store))">
+                            </RadzenButton>
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+                </Columns>
+            </RadzenDataGrid>
+        }
+    </Authorized>
+    <!-- Show this section if the user is not logged in -->
+    <NotAuthorized>
+        <p>You're not signed in.</p>
+    </NotAuthorized>
+</AuthorizeView>
