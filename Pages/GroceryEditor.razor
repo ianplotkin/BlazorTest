@@ -1,7 +1,7 @@
 ﻿@using Radzen;
 @using Radzen.Blazor;
 @using BlazorTest.Data
-@using BlazorTest.Data.Data.Models
+@using BlazorTest.Data.Models
 @inject DialogService DialogService
 
 <h3>GroceryEditor</h3>
@@ -20,7 +20,7 @@
         <div class="align-items-center d-flex">
             <RadzenDropDown class="form-control" Data="@units" @bind-Value=@editingGrocery.DefaultUnit Style="margin-right: 5px; width: 100px" Placeholder="Unit" />
             @code {
-                string[] units = Enum.GetNames(typeof(BlazorTest.Data.Data.Models.Units));
+                string[] units = Enum.GetNames(typeof(BlazorTest.Data.Models.Units));
             }
         </div>
         <div class="align-items-center d-flex">

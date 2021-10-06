@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 #nullable disable
 
-namespace BlazorTest.Data.Data.Models
+namespace BlazorTest.Data.Models
 {
     public partial class Store
     {

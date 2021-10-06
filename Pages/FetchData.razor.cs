@@ -1,6 +1,6 @@
 ﻿
 using BlazorTest.Data;
-using BlazorTest.Data.Data.Models;
+using BlazorTest.Data.Models;
 using BlazorTest.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;

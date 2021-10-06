@@ -1,4 +1,4 @@
-﻿namespace BlazorTest.Data.Data.Models
+﻿namespace BlazorTest.Data.Models
 {
     public enum Units
     {

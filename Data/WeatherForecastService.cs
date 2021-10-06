@@ -1,4 +1,4 @@
-using BlazorTest.Data.Data.Models;
+using BlazorTest.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

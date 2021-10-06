@@ -1,6 +1,6 @@
 using BlazorTest.Areas.Identity;
 using BlazorTest.Data;
-using BlazorTest.Data.Data.Models;
+using BlazorTest.Data.Models;
 using BlazorTest.Shared;
 using BlazorTest.Utils;
 using Microsoft.AspNetCore.Builder;

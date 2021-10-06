@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 #nullable disable
 
-namespace BlazorTest.Data.Data.Models
+namespace BlazorTest.Data.Models
 {
     public partial class GroceryContext : DbContext
     {
