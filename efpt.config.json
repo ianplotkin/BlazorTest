@@ -8,7 +8,7 @@
    "ModelNamespace": null,
    "OutputContextPath": null,
    "OutputPath": "Data\\Models",
-   "ProjectRootNamespace": "BlazorTest.Data",
+   "ProjectRootNamespace": "BlazorTest",
    "Schemas": null,
    "SelectedHandlebarsLanguage": 0,
    "SelectedToBeGenerated": 0,
@@ -23,6 +23,14 @@
       },
       {
          "Name": "[dbo].[Store]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[StoreArea]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[StoreAreaMember]",
          "ObjectType": 0
       },
       {

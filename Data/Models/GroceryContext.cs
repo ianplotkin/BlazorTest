@@ -21,6 +21,8 @@ namespace BlazorTest.Data.Models
         public virtual DbSet<Category> Category { get; set; }
         public virtual DbSet<Grocery> Grocery { get; set; }
         public virtual DbSet<Store> Store { get; set; }
+        public virtual DbSet<StoreArea> StoreArea { get; set; }
+        public virtual DbSet<StoreAreaMember> StoreAreaMember { get; set; }
         public virtual DbSet<WeatherForecast> WeatherForecast { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -56,6 +58,36 @@ namespace BlazorTest.Data.Models
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<StoreArea>(entity =>
+            {
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.HasOne(d => d.Store)
+                    .WithMany(p => p.StoreArea)
+                    .HasForeignKey(d => d.StoreId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_StoreArea_Store");
+            });
+
+            modelBuilder.Entity<StoreAreaMember>(entity =>
+            {
+                entity.HasKey(e => new { e.GroceryId, e.StoreAreaId });
+
+                entity.HasOne(d => d.Grocery)
+                    .WithMany(p => p.StoreAreaMember)
+                    .HasForeignKey(d => d.GroceryId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_StoreAreaMember_Grocery");
+
+                entity.HasOne(d => d.StoreArea)
+                    .WithMany(p => p.StoreAreaMember)
+                    .HasForeignKey(d => d.StoreAreaId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_StoreAreaMember_StoreArea");
             });
 
             modelBuilder.Entity<WeatherForecast>(entity =>

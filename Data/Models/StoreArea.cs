@@ -6,20 +6,18 @@ using System.Collections.Generic;
 
 namespace BlazorTest.Data.Models
 {
-    public partial class Grocery
+    public partial class StoreArea
     {
-        public Grocery()
+        public StoreArea()
         {
             StoreAreaMember = new HashSet<StoreAreaMember>();
         }
 
         public int Id { get; set; }
+        public int StoreId { get; set; }
         public string Name { get; set; }
-        public int CategoryId { get; set; }
-        public double DefaultAmount { get; set; }
-        public string DefaultUnit { get; set; }
 
-        public virtual Category Category { get; set; }
+        public virtual Store Store { get; set; }
         public virtual ICollection<StoreAreaMember> StoreAreaMember { get; set; }
     }
 }

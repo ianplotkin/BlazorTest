@@ -8,7 +8,14 @@ namespace BlazorTest.Data.Models
 {
     public partial class Store
     {
+        public Store()
+        {
+            StoreArea = new HashSet<StoreArea>();
+        }
+
         public int Id { get; set; }
         public string Name { get; set; }
+
+        public virtual ICollection<StoreArea> StoreArea { get; set; }
     }
 }
