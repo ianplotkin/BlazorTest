@@ -20,6 +20,7 @@ namespace BlazorTest.Data.Models
         public string DefaultUnit { get; set; }
 
         public virtual Category Category { get; set; }
+        public virtual Need Need { get; set; }
         public virtual ICollection<StoreAreaMember> StoreAreaMember { get; set; }
     }
 }

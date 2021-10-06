@@ -20,6 +20,7 @@ namespace BlazorTest.Data.Models
 
         public virtual DbSet<Category> Category { get; set; }
         public virtual DbSet<Grocery> Grocery { get; set; }
+        public virtual DbSet<Need> Need { get; set; }
         public virtual DbSet<Store> Store { get; set; }
         public virtual DbSet<StoreArea> StoreArea { get; set; }
         public virtual DbSet<StoreAreaMember> StoreAreaMember { get; set; }
@@ -51,6 +52,26 @@ namespace BlazorTest.Data.Models
                     .HasForeignKey(d => d.CategoryId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Grocery_Category");
+            });
+
+            modelBuilder.Entity<Need>(entity =>
+            {
+                entity.HasKey(e => e.GroceryId);
+
+                entity.HasIndex(e => e.GroceryId, "IX_Need")
+                    .IsUnique();
+
+                entity.Property(e => e.GroceryId).ValueGeneratedNever();
+
+                entity.Property(e => e.Unit)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                entity.HasOne(d => d.Grocery)
+                    .WithOne(p => p.Need)
+                    .HasForeignKey<Need>(d => d.GroceryId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Need_Grocery");
             });
 
             modelBuilder.Entity<Store>(entity =>
